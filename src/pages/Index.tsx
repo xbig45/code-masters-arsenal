@@ -280,7 +280,7 @@ const Index = () => {
                 Explore our most popular C++ programming courses
               </p>
               <Link to="/courses" className="inline-block mt-4">
-                <Button variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-500/10">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
                   View All Courses <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
