@@ -1,8 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Code2, Cpu, Shield, Zap, Users, Award, ArrowRight, BookOpen, Star, CheckCircle, Clock, Filter, Play, User, Github, ExternalLink } from "lucide-react";
+import { Code2, Cpu, Shield, Zap, Users, Award, ArrowRight, BookOpen, Star, CheckCircle, Clock, Filter, Play, Github, ExternalLink, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import ParticleNetwork from "@/components/ParticleNetwork";
 import LiveChatSupport from "@/components/LiveChatSupport";
@@ -194,17 +195,36 @@ const Index = () => {
               <div className="flex items-center space-x-8">
                 <a href="#courses" className="text-slate-300 hover:text-white transition-colors">Courses</a>
                 <a href="#portfolio" className="text-slate-300 hover:text-white transition-colors">Portfolio</a>
-                <Link to="/about" className="text-slate-300 hover:text-white transition-colors">About</Link>
-                <Link to="/contact" className="text-slate-300 hover:text-white transition-colors">Contact</Link>
-                <Button className="bg-blue-600 hover:bg-blue-700">Login</Button>
+                <Link to="/template" className="text-slate-300 hover:text-white transition-colors">Template</Link>
+                <Link to="/downloads" className="text-slate-300 hover:text-white transition-colors">Downloads</Link>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Link to="/login">
+                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    Get Started
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center">
+        {/* Hero Section with Header Image */}
+        <section className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1920&h=1080&fit=crop" 
+              alt="Programming background"
+              className="w-full h-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90"></div>
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto text-center">
             <Badge className="mb-6 bg-blue-600/20 text-blue-300 border-blue-500/30">
               🚀 Trusted by 10,000+ Developers Worldwide
             </Badge>
@@ -214,10 +234,20 @@ const Index = () => {
             <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
               From fundamental concepts to advanced kernel development. Join thousands of developers with our membership-based learning platform.
             </p>
-            
-            {/* Membership Pricing */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-              <Card className="bg-slate-800/50 border-slate-700 relative">
+          </div>
+        </section>
+
+        {/* Membership Pricing Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">Choose Your Membership</h2>
+              <p className="text-xl text-slate-300">
+                Start learning today with our flexible membership options
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <Card className="bg-slate-800/50 border-slate-700 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
                 <CardHeader>
                   <CardTitle className="text-white text-2xl">Free Membership</CardTitle>
                   <CardDescription className="text-slate-300">
@@ -235,12 +265,16 @@ const Index = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-slate-800/50 border-blue-500 relative">
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
+              <Card className="bg-slate-800/50 border-blue-500 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white flex items-center gap-1">
+                  <Crown className="h-4 w-4" />
                   Most Popular
                 </Badge>
                 <CardHeader>
-                  <CardTitle className="text-white text-2xl">Premium Membership</CardTitle>
+                  <CardTitle className="text-white text-2xl flex items-center gap-2">
+                    <Crown className="h-6 w-6 text-yellow-400" />
+                    Premium Membership
+                  </CardTitle>
                   <CardDescription className="text-slate-300">
                     Complete access to all courses and advanced features
                   </CardDescription>
@@ -295,16 +329,19 @@ const Index = () => {
               {filteredCourses.map((course) => (
                 <Dialog key={course.id}>
                   <DialogTrigger asChild>
-                    <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-750 transition-all duration-300 group backdrop-blur-sm cursor-pointer">
-                      <div className="relative">
+                    <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-750 transition-all duration-300 group backdrop-blur-sm cursor-pointer overflow-hidden">
+                      <div className="relative overflow-hidden">
                         <img 
                           src={course.image} 
                           alt={course.title}
-                          className="w-full h-48 object-cover rounded-t-lg"
+                          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                         <div className="absolute top-4 right-4">
                           {course.tier === "premium" ? (
-                            <Badge className="bg-blue-600 text-white">Premium</Badge>
+                            <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                              <Crown className="h-3 w-3" />
+                              Premium
+                            </Badge>
                           ) : (
                             <Badge className="bg-green-600 text-white">Free</Badge>
                           )}
@@ -363,11 +400,13 @@ const Index = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-6">
-                      <img 
-                        src={course.image} 
-                        alt={course.title}
-                        className="w-full h-64 object-cover rounded-lg"
-                      />
+                      <div className="overflow-hidden rounded-lg">
+                        <img 
+                          src={course.image} 
+                          alt={course.title}
+                          className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
                       <div className="flex items-center gap-4">
                         <Badge variant="outline" className="border-slate-600 text-slate-300">
                           {course.level}
@@ -378,7 +417,10 @@ const Index = () => {
                           <span className="text-white font-medium">{course.rating}</span>
                         </div>
                         {course.tier === "premium" ? (
-                          <Badge className="bg-blue-600 text-white">Premium</Badge>
+                          <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                            <Crown className="h-3 w-3" />
+                            Premium
+                          </Badge>
                         ) : (
                           <Badge className="bg-green-600 text-white">Free</Badge>
                         )}
@@ -389,9 +431,11 @@ const Index = () => {
                           <Play className="h-4 w-4 mr-2" />
                           Start Course
                         </Button>
-                        <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
-                          Login Required
-                        </Button>
+                        <Link to="/login" className="flex-1">
+                          <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-800">
+                            Login Required
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </DialogContent>
@@ -414,7 +458,7 @@ const Index = () => {
             <div className="grid md:grid-cols-2 gap-8">
               {portfolioProjects.map((project) => (
                 <Card key={project.id} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden group hover:bg-slate-750 transition-all duration-300">
-                  <div className="relative">
+                  <div className="relative overflow-hidden">
                     <img 
                       src={project.image} 
                       alt={project.title}
@@ -466,7 +510,7 @@ const Index = () => {
             
             <div className="grid md:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden hover:scale-105 transition-transform duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -516,10 +560,12 @@ const Index = () => {
             <p className="text-xl text-slate-300 mb-8">
               Join thousands of developers who have mastered C++ programming with our proven curriculum
             </p>
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-3">
-              Start Free Trial
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to="/register">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-3">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </section>
 
@@ -552,8 +598,8 @@ const Index = () => {
                 <ul className="space-y-2 text-slate-300">
                   <li><Link to="/" className="hover:text-white transition-colors">Help Center</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">Community</Link></li>
-                  <li><Link to="/" className="hover:text-white transition-colors">Contact Us</Link></li>
-                  <li><Link to="/" className="hover:text-white transition-colors">FAQ</Link></li>
+                  <li><Link to="/template" className="hover:text-white transition-colors">Template</Link></li>
+                  <li><Link to="/downloads" className="hover:text-white transition-colors">Downloads</Link></li>
                 </ul>
               </div>
             </div>
