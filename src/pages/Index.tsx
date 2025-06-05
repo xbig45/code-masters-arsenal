@@ -230,7 +230,7 @@ const Index = () => {
               </div>
               
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white p-2">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-blue-400 hover:bg-slate-800/50 p-2">
                   <Bell className="h-5 w-5" />
                 </Button>
                 <Link to="/login">
@@ -434,14 +434,16 @@ const Index = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-slate-800/50 to-blue-900/30 border-amber-500 relative overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-2xl shadow-amber-500/20">
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white flex items-center gap-1">
-                  <Crown className="h-4 w-4" />
-                  Most Popular
-                </Badge>
-                <CardHeader>
+              <Card className="bg-slate-800/50 border-blue-500/50 relative overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-2xl shadow-blue-500/20">
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center gap-1 shadow-lg">
+                    <Crown className="h-4 w-4" />
+                    Most Popular
+                  </Badge>
+                </div>
+                <CardHeader className="pt-12">
                   <CardTitle className="text-white text-2xl flex items-center gap-2">
-                    <Crown className="h-6 w-6 text-amber-400" />
+                    <Crown className="h-6 w-6 text-blue-400" />
                     Premium Membership
                   </CardTitle>
                   <CardDescription className="text-slate-300">
@@ -456,7 +458,7 @@ const Index = () => {
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Priority support</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Industry certificates</li>
                   </ul>
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white">
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     <Crown className="h-4 w-4 mr-2" />
                     Start Premium Trial
                   </Button>
