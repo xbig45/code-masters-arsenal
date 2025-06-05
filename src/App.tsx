@@ -9,6 +9,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Downloads from "./pages/Downloads";
 import Template from "./pages/Template";
+import AllCourses from "./pages/AllCourses";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import Goals from "./pages/Goals";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/downloads" element={<Downloads />} />
           <Route path="/template" element={<Template />} />
+          <Route path="/courses" element={<AllCourses />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/goals" element={<Goals />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Code2, Cpu, Shield, Zap, Users, Award, ArrowRight, BookOpen, Star, CheckCircle, Clock, Filter, Play, Github, ExternalLink, Crown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Code2, Cpu, Shield, Zap, Users, Award, ArrowRight, BookOpen, Star, CheckCircle, Clock, Filter, Play, Github, ExternalLink, Crown, Bell } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import ParticleNetwork from "@/components/ParticleNetwork";
 import LiveChatSupport from "@/components/LiveChatSupport";
 import { useState } from "react";
 
 const Index = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const location = useLocation();
 
   const courses = [
     {
@@ -174,6 +175,8 @@ const Index = () => {
     }
   ];
 
+  const isActivePage = (path: string) => location.pathname === path;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
       <ParticleNetwork />
@@ -181,9 +184,9 @@ const Index = () => {
       
       <div className="relative z-10">
         {/* Navigation */}
-        <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-40">
+        <nav className="border-b border-slate-700 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
+            <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -192,20 +195,51 @@ const Index = () => {
                   <span className="text-xl font-bold text-white">CodeForge Academy</span>
                 </div>
               </div>
+              
               <div className="flex items-center space-x-8">
-                <a href="#courses" className="text-slate-300 hover:text-white transition-colors">Courses</a>
-                <a href="#portfolio" className="text-slate-300 hover:text-white transition-colors">Portfolio</a>
-                <Link to="/template" className="text-slate-300 hover:text-white transition-colors">Template</Link>
-                <Link to="/downloads" className="text-slate-300 hover:text-white transition-colors">Downloads</Link>
+                <Link 
+                  to="/courses" 
+                  className={`transition-colors px-3 py-2 rounded-md ${
+                    isActivePage('/courses') ? 'text-blue-400 bg-blue-500/10' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  All Courses
+                </Link>
+                <a 
+                  href="#portfolio" 
+                  className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md"
+                >
+                  Portfolio
+                </a>
+                <Link 
+                  to="/template" 
+                  className={`transition-colors px-3 py-2 rounded-md ${
+                    isActivePage('/template') ? 'text-blue-400 bg-blue-500/10' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  Template
+                </Link>
+                <Link 
+                  to="/downloads" 
+                  className={`transition-colors px-3 py-2 rounded-md ${
+                    isActivePage('/downloads') ? 'text-blue-400 bg-blue-500/10' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  Downloads
+                </Link>
               </div>
+              
               <div className="flex items-center space-x-4">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white p-2">
+                  <Bell className="h-5 w-5" />
+                </Button>
                 <Link to="/login">
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
+                  <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-600">
                     Login
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     Get Started
                   </Button>
                 </Link>
@@ -220,7 +254,7 @@ const Index = () => {
             <img 
               src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1920&h=1080&fit=crop" 
               alt="Programming background"
-              className="w-full h-full object-cover opacity-20"
+              className="w-full h-full object-cover opacity-20 transition-transform duration-700 hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90"></div>
           </div>
@@ -237,108 +271,35 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Membership Pricing Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">Choose Your Membership</h2>
-              <p className="text-xl text-slate-300">
-                Start learning today with our flexible membership options
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <Card className="bg-slate-800/50 border-slate-700 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-                <CardHeader>
-                  <CardTitle className="text-white text-2xl">Free Membership</CardTitle>
-                  <CardDescription className="text-slate-300">
-                    Perfect for getting started with C++ fundamentals
-                  </CardDescription>
-                  <div className="text-3xl font-bold text-white">$0<span className="text-lg text-slate-400">/month</span></div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 text-slate-300 mb-6">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Basic C++ courses</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Community access</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Basic certificate</li>
-                  </ul>
-                  <Button className="w-full bg-slate-700 hover:bg-slate-600">Get Started Free</Button>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-slate-800/50 border-blue-500 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white flex items-center gap-1">
-                  <Crown className="h-4 w-4" />
-                  Most Popular
-                </Badge>
-                <CardHeader>
-                  <CardTitle className="text-white text-2xl flex items-center gap-2">
-                    <Crown className="h-6 w-6 text-yellow-400" />
-                    Premium Membership
-                  </CardTitle>
-                  <CardDescription className="text-slate-300">
-                    Complete access to all courses and advanced features
-                  </CardDescription>
-                  <div className="text-3xl font-bold text-white">$29<span className="text-lg text-slate-400">/month</span></div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 text-slate-300 mb-6">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />All courses included</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />1-on-1 mentoring</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Priority support</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Industry certificates</li>
-                  </ul>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Premium Trial</Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
         {/* Courses Section */}
         <section id="courses" className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">Course Library</h2>
+              <h2 className="text-4xl font-bold text-white mb-4">Featured Courses</h2>
               <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-                Explore our comprehensive collection of C++ programming courses
+                Explore our most popular C++ programming courses
               </p>
-            </div>
-            
-            {/* Course Filters */}
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center space-x-4 bg-slate-800/50 rounded-lg p-1">
-                <Filter className="h-5 w-5 text-slate-400 ml-3" />
-                {filters.map((filter) => (
-                  <Button
-                    key={filter.id}
-                    variant={selectedFilter === filter.id ? "default" : "ghost"}
-                    className={`${
-                      selectedFilter === filter.id 
-                        ? "bg-blue-600 hover:bg-blue-700" 
-                        : "text-slate-300 hover:text-white hover:bg-slate-700"
-                    }`}
-                    onClick={() => setSelectedFilter(filter.id)}
-                  >
-                    {filter.label}
-                  </Button>
-                ))}
-              </div>
+              <Link to="/courses" className="inline-block mt-4">
+                <Button variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-500/10">
+                  View All Courses <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredCourses.map((course) => (
+              {courses.slice(0, 3).map((course) => (
                 <Dialog key={course.id}>
                   <DialogTrigger asChild>
-                    <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-750 transition-all duration-300 group backdrop-blur-sm cursor-pointer overflow-hidden">
+                    <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-750 transition-all duration-300 group backdrop-blur-sm cursor-pointer overflow-hidden hover:scale-105 hover:shadow-2xl">
                       <div className="relative overflow-hidden">
                         <img 
                           src={course.image} 
                           alt={course.title}
-                          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div className="absolute top-4 right-4">
                           {course.tier === "premium" ? (
-                            <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                            <Badge className="bg-gradient-to-r from-amber-500 to-yellow-600 text-white flex items-center gap-1">
                               <Crown className="h-3 w-3" />
                               Premium
                             </Badge>
@@ -417,7 +378,7 @@ const Index = () => {
                           <span className="text-white font-medium">{course.rating}</span>
                         </div>
                         {course.tier === "premium" ? (
-                          <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                          <Badge className="bg-gradient-to-r from-amber-500 to-yellow-600 text-white flex items-center gap-1">
                             <Crown className="h-3 w-3" />
                             Premium
                           </Badge>
@@ -445,8 +406,68 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Membership Pricing Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">Choose Your Membership</h2>
+              <p className="text-xl text-slate-300">
+                Start learning today with our flexible membership options
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <Card className="bg-slate-800/50 border-slate-700 relative overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+                <CardHeader>
+                  <CardTitle className="text-white text-2xl">Free Membership</CardTitle>
+                  <CardDescription className="text-slate-300">
+                    Perfect for getting started with C++ fundamentals
+                  </CardDescription>
+                  <div className="text-3xl font-bold text-white">$0<span className="text-lg text-slate-400">/month</span></div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-slate-300 mb-6">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Basic C++ courses</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Community access</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Basic certificate</li>
+                  </ul>
+                  <Button className="w-full bg-slate-700 hover:bg-slate-600">Get Started Free</Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-slate-800/50 to-blue-900/30 border-amber-500 relative overflow-hidden group hover:scale-105 transition-all duration-300 hover:shadow-2xl shadow-amber-500/20">
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white flex items-center gap-1">
+                  <Crown className="h-4 w-4" />
+                  Most Popular
+                </Badge>
+                <CardHeader>
+                  <CardTitle className="text-white text-2xl flex items-center gap-2">
+                    <Crown className="h-6 w-6 text-amber-400" />
+                    Premium Membership
+                  </CardTitle>
+                  <CardDescription className="text-slate-300">
+                    Complete access to all courses and advanced features
+                  </CardDescription>
+                  <div className="text-3xl font-bold text-white">$29<span className="text-lg text-slate-400">/month</span></div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-slate-300 mb-6">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />All courses included</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />1-on-1 mentoring</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Priority support</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-2" />Industry certificates</li>
+                  </ul>
+                  <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Start Premium Trial
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* Portfolio Section */}
-        <section id="portfolio" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+        <section id="portfolio" className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">Student Portfolio</h2>
@@ -457,22 +478,22 @@ const Index = () => {
             
             <div className="grid md:grid-cols-2 gap-8">
               {portfolioProjects.map((project) => (
-                <Card key={project.id} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden group hover:bg-slate-750 transition-all duration-300">
+                <Card key={project.id} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden group hover:bg-slate-750 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                   <div className="relative overflow-hidden">
                     <img 
                       src={project.image} 
                       alt={project.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                       <div className="flex space-x-4">
-                        <Button size="sm" variant="secondary" className="bg-white/20 backdrop-blur-sm">
+                        <Button size="sm" className="bg-slate-900/90 text-white border border-slate-600 hover:bg-slate-800 backdrop-blur-sm">
                           <Github className="h-4 w-4 mr-2" />
                           Code
                         </Button>
-                        <Button size="sm" variant="secondary" className="bg-white/20 backdrop-blur-sm">
+                        <Button size="sm" className="bg-blue-600/90 text-white hover:bg-blue-700 backdrop-blur-sm">
                           <ExternalLink className="h-4 w-4 mr-2" />
-                          Live
+                          Live Demo
                         </Button>
                       </div>
                     </div>
@@ -499,7 +520,7 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">What Our Students Say</h2>
@@ -510,7 +531,7 @@ const Index = () => {
             
             <div className="grid md:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden hover:scale-105 transition-transform duration-300">
+                <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-2xl">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -530,7 +551,7 @@ const Index = () => {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+        <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">Why Choose CodeForge Academy?</h2>
@@ -554,7 +575,7 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-white mb-6">Ready to Start Your Journey?</h2>
             <p className="text-xl text-slate-300 mb-8">
@@ -587,6 +608,7 @@ const Index = () => {
               <div>
                 <h4 className="text-white font-semibold mb-4">Courses</h4>
                 <ul className="space-y-2 text-slate-300">
+                  <li><Link to="/courses" className="hover:text-white transition-colors">All Courses</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">C++ Fundamentals</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">Advanced C++</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">System Programming</Link></li>
