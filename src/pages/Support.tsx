@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { MessageCircle, Send, Plus, Search, Filter, Clock, CheckCircle, AlertCircle, XCircle, User, Bot, Headphones, Ticket, Mail, Phone } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageCircle, Send, Plus, Search, Filter, Clock, CheckCircle, AlertCircle, XCircle, User, Bot, Headphones, Ticket, Mail, Phone, Settings, Trash2, Edit, Shield, UserCog } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ParticleNetwork from "@/components/ParticleNetwork";
 
@@ -19,22 +21,44 @@ interface TicketData {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'open' | 'in-progress' | 'resolved' | 'closed';
   category: string;
+  type: 'support' | 'software-request';
   createdAt: Date;
   updatedAt: Date;
   customerName: string;
   customerEmail: string;
+  assignedTo?: string;
 }
 
 interface ChatMessage {
   id: number;
   text: string;
-  sender: 'user' | 'support';
+  sender: 'user' | 'admin';
+  senderName: string;
+  senderAvatar?: string;
   timestamp: Date;
   ticketId?: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: 'user' | 'admin';
+}
+
 const Support: React.FC = () => {
   const { toast } = useToast();
+  const [currentUser] = useState<User>({
+    id: 'user-1',
+    name: 'John Doe',
+    email: 'john.doe@email.com',
+    avatar: '/placeholder.svg',
+    role: 'user'
+  });
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [tickets, setTickets] = useState<TicketData[]>([
     {
       id: 'TK-001',
@@ -43,10 +67,12 @@ const Support: React.FC = () => {
       priority: 'high',
       status: 'open',
       category: 'Authentication',
+      type: 'support',
       createdAt: new Date(2024, 0, 15),
       updatedAt: new Date(2024, 0, 15),
       customerName: 'John Doe',
-      customerEmail: 'john.doe@email.com'
+      customerEmail: 'john.doe@email.com',
+      assignedTo: 'Admin Sarah'
     },
     {
       id: 'TK-002',
@@ -55,22 +81,39 @@ const Support: React.FC = () => {
       priority: 'medium',
       status: 'in-progress',
       category: 'Billing',
+      type: 'support',
       createdAt: new Date(2024, 0, 14),
       updatedAt: new Date(2024, 0, 15),
       customerName: 'Jane Smith',
-      customerEmail: 'jane.smith@email.com'
+      customerEmail: 'jane.smith@email.com',
+      assignedTo: 'Admin Mike'
     },
     {
-      id: 'TK-003',
-      title: 'Feature Request',
+      id: 'SR-001',
+      title: 'Dark Mode Feature',
       description: 'Would like to see dark mode option in the app',
       priority: 'low',
       status: 'resolved',
-      category: 'Feature Request',
+      category: 'UI/UX',
+      type: 'software-request',
       createdAt: new Date(2024, 0, 12),
       updatedAt: new Date(2024, 0, 14),
       customerName: 'Mike Johnson',
-      customerEmail: 'mike.johnson@email.com'
+      customerEmail: 'mike.johnson@email.com',
+      assignedTo: 'Dev Team'
+    },
+    {
+      id: 'SR-002',
+      title: 'Mobile App',
+      description: 'Request for a dedicated mobile application',
+      priority: 'high',
+      status: 'open',
+      category: 'Development',
+      type: 'software-request',
+      createdAt: new Date(2024, 0, 13),
+      updatedAt: new Date(2024, 0, 13),
+      customerName: 'Sarah Wilson',
+      customerEmail: 'sarah.wilson@email.com'
     }
   ]);
 
@@ -78,7 +121,9 @@ const Support: React.FC = () => {
     {
       id: 1,
       text: "Hello! Welcome to CodeForge Academy Support. How can I help you today?",
-      sender: 'support',
+      sender: 'admin',
+      senderName: 'Support Admin',
+      senderAvatar: '/placeholder.svg',
       timestamp: new Date()
     }
   ]);
@@ -86,8 +131,9 @@ const Support: React.FC = () => {
   const [newTicket, setNewTicket] = useState({
     title: '',
     description: '',
-    priority: 'medium' as const,
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
     category: '',
+    type: 'support' as 'support' | 'software-request',
     customerName: '',
     customerEmail: ''
   });
@@ -95,7 +141,8 @@ const Support: React.FC = () => {
   const [chatInput, setChatInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,8 +159,11 @@ const Support: React.FC = () => {
       return;
     }
 
+    const prefix = newTicket.type === 'support' ? 'TK' : 'SR';
+    const existingCount = tickets.filter(t => t.type === newTicket.type).length;
+    
     const ticket: TicketData = {
-      id: `TK-${String(tickets.length + 1).padStart(3, '0')}`,
+      id: `${prefix}-${String(existingCount + 1).padStart(3, '0')}`,
       ...newTicket,
       status: 'open',
       createdAt: new Date(),
@@ -126,13 +176,14 @@ const Support: React.FC = () => {
       description: '',
       priority: 'medium',
       category: '',
+      type: 'support',
       customerName: '',
       customerEmail: ''
     });
 
     toast({
       title: "Success",
-      description: `Ticket ${ticket.id} created successfully`,
+      description: `${newTicket.type === 'support' ? 'Support ticket' : 'Software request'} ${ticket.id} created successfully`,
     });
   };
 
@@ -143,21 +194,25 @@ const Support: React.FC = () => {
       id: chatMessages.length + 1,
       text: chatInput,
       sender: 'user',
+      senderName: currentUser.name,
+      senderAvatar: currentUser.avatar,
       timestamp: new Date()
     };
 
     setChatMessages(prev => [...prev, userMessage]);
     setChatInput('');
 
-    // Simulate support response
+    // Simulate admin response
     setTimeout(() => {
-      const supportResponse: ChatMessage = {
+      const adminResponse: ChatMessage = {
         id: chatMessages.length + 2,
         text: "Thank you for your message. I've received your inquiry and will help you resolve this issue. Let me check our knowledge base for the best solution.",
-        sender: 'support',
+        sender: 'admin',
+        senderName: 'Support Admin',
+        senderAvatar: '/placeholder.svg',
         timestamp: new Date()
       };
-      setChatMessages(prev => [...prev, supportResponse]);
+      setChatMessages(prev => [...prev, adminResponse]);
     }, 1000);
   };
 
@@ -170,6 +225,27 @@ const Support: React.FC = () => {
     toast({
       title: "Updated",
       description: `Ticket ${ticketId} status changed to ${newStatus}`,
+    });
+  };
+
+  const assignTicket = (ticketId: string, assignee: string) => {
+    setTickets(tickets.map(ticket => 
+      ticket.id === ticketId 
+        ? { ...ticket, assignedTo: assignee, updatedAt: new Date() }
+        : ticket
+    ));
+    toast({
+      title: "Assigned",
+      description: `Ticket ${ticketId} assigned to ${assignee}`,
+    });
+  };
+
+  const deleteTicket = (ticketId: string) => {
+    setTickets(tickets.filter(ticket => ticket.id !== ticketId));
+    toast({
+      title: "Deleted",
+      description: `Ticket ${ticketId} has been deleted`,
+      variant: "destructive"
     });
   };
 
@@ -207,8 +283,10 @@ const Support: React.FC = () => {
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ticket.customerName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || ticket.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesStatus = filterStatus === 'all' || ticket.status === filterStatus;
+    const matchesType = filterType === 'all' || ticket.type === filterType;
+    const matchesPriority = filterPriority === 'all' || ticket.priority === filterPriority;
+    return matchesSearch && matchesStatus && matchesType && matchesPriority;
   });
 
   return (
@@ -217,7 +295,7 @@ const Support: React.FC = () => {
       
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Headphones className="h-12 w-12 text-blue-400 mr-4" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -225,8 +303,27 @@ const Support: React.FC = () => {
             </h1>
           </div>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Get help when you need it. Create tickets, chat with support, and track your issues.
+            Get help when you need it. Create tickets, request software features, and chat with our support team.
           </p>
+          
+          {/* Top Action Buttons */}
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Button
+              onClick={() => window.open('https://discord.gg/codeforge', '_blank')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Join Discord
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsAdmin(!isAdmin)}
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              {isAdmin ? <User className="h-4 w-4 mr-2" /> : <Shield className="h-4 w-4 mr-2" />}
+              {isAdmin ? 'User View' : 'Admin View'}
+            </Button>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -234,11 +331,11 @@ const Support: React.FC = () => {
           <TabsList className="grid w-full grid-cols-4 bg-slate-800 border-slate-700">
             <TabsTrigger value="tickets" className="data-[state=active]:bg-blue-600">
               <Ticket className="h-4 w-4 mr-2" />
-              Tickets
+              All Tickets
             </TabsTrigger>
             <TabsTrigger value="create" className="data-[state=active]:bg-blue-600">
               <Plus className="h-4 w-4 mr-2" />
-              Create Ticket
+              Create Request
             </TabsTrigger>
             <TabsTrigger value="chat" className="data-[state=active]:bg-blue-600">
               <MessageCircle className="h-4 w-4 mr-2" />
@@ -254,12 +351,17 @@ const Support: React.FC = () => {
           <TabsContent value="tickets" className="space-y-6">
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="text-white">Support Tickets</CardTitle>
-                <CardDescription>Manage and track your support requests</CardDescription>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span>Support Tickets & Software Requests</span>
+                  <Badge variant="outline" className="border-blue-400 text-blue-400">
+                    {filteredTickets.length} total
+                  </Badge>
+                </CardTitle>
+                <CardDescription>Manage and track your support requests and feature requests</CardDescription>
                 
-                {/* Search and Filter */}
-                <div className="flex gap-4 mt-4">
-                  <div className="relative flex-1">
+                {/* Advanced Search and Filter */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                  <div className="relative lg:col-span-2">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="Search tickets..."
@@ -268,17 +370,40 @@ const Support: React.FC = () => {
                       className="pl-10 bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="software-request">Software Request</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterPriority} onValueChange={setFilterPriority}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Priority" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectItem value="all">All Priority</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardHeader>
               <CardContent>
@@ -286,10 +411,11 @@ const Support: React.FC = () => {
                   <TableHeader>
                     <TableRow className="border-slate-700">
                       <TableHead className="text-slate-300">ID</TableHead>
+                      <TableHead className="text-slate-300">Type</TableHead>
                       <TableHead className="text-slate-300">Title</TableHead>
                       <TableHead className="text-slate-300">Priority</TableHead>
                       <TableHead className="text-slate-300">Status</TableHead>
-                      <TableHead className="text-slate-300">Category</TableHead>
+                      <TableHead className="text-slate-300">Assigned To</TableHead>
                       <TableHead className="text-slate-300">Created</TableHead>
                       <TableHead className="text-slate-300">Actions</TableHead>
                     </TableRow>
@@ -298,6 +424,11 @@ const Support: React.FC = () => {
                     {filteredTickets.map((ticket) => (
                       <TableRow key={ticket.id} className="border-slate-700">
                         <TableCell className="font-mono text-blue-400">{ticket.id}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={ticket.type === 'support' ? 'border-blue-400 text-blue-400' : 'border-purple-400 text-purple-400'}>
+                            {ticket.type === 'support' ? 'Support' : 'Feature'}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium text-white">{ticket.title}</div>
@@ -317,44 +448,81 @@ const Support: React.FC = () => {
                             {ticket.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-slate-300">{ticket.category}</TableCell>
+                        <TableCell className="text-slate-300">
+                          {ticket.assignedTo || 'Unassigned'}
+                        </TableCell>
                         <TableCell className="text-slate-400">
                           {ticket.createdAt.toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-700">
-                                Update
+                          <div className="flex gap-2">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="bg-slate-800 border-slate-700">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-white">Update Ticket</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Manage ticket {ticket.id}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="text-sm text-slate-300 mb-2 block">Status</label>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {['open', 'in-progress', 'resolved', 'closed'].map((status) => (
+                                        <Button
+                                          key={status}
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => updateTicketStatus(ticket.id, status as TicketData['status'])}
+                                          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                                        >
+                                          {status}
+                                        </Button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  {isAdmin && (
+                                    <div>
+                                      <label className="text-sm text-slate-300 mb-2 block">Assign To</label>
+                                      <div className="flex gap-2 flex-wrap">
+                                        {['Admin Sarah', 'Admin Mike', 'Dev Team'].map((assignee) => (
+                                          <Button
+                                            key={assignee}
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => assignTicket(ticket.id, assignee)}
+                                            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                                          >
+                                            {assignee}
+                                          </Button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
+                                    Close
+                                  </AlertDialogCancel>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                            {isAdmin && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => deleteTicket(ticket.id)}
+                                className="border-red-600 text-red-400 hover:bg-red-900"
+                              >
+                                <Trash2 className="h-3 w-3" />
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-slate-800 border-slate-700">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white">Update Ticket Status</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Change the status of ticket {ticket.id}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <div className="flex gap-2 flex-wrap">
-                                {['open', 'in-progress', 'resolved', 'closed'].map((status) => (
-                                  <Button
-                                    key={status}
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => updateTicketStatus(ticket.id, status as TicketData['status'])}
-                                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                                  >
-                                    {status}
-                                  </Button>
-                                ))}
-                              </div>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
-                                  Cancel
-                                </AlertDialogCancel>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -368,8 +536,8 @@ const Support: React.FC = () => {
           <TabsContent value="create" className="space-y-6">
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="text-white">Create New Ticket</CardTitle>
-                <CardDescription>Submit a new support request</CardDescription>
+                <CardTitle className="text-white">Create New Request</CardTitle>
+                <CardDescription>Submit a support ticket or software feature request</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -400,13 +568,28 @@ const Support: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Request Type *
+                  </label>
+                  <Select value={newTicket.type} onValueChange={(value: 'support' | 'software-request') => setNewTicket({...newTicket, type: value})}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Select request type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectItem value="support">Support Ticket</SelectItem>
+                      <SelectItem value="software-request">Software Feature Request</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Subject *
                   </label>
                   <Input
                     value={newTicket.title}
                     onChange={(e) => setNewTicket({...newTicket, title: e.target.value})}
                     className="bg-slate-700 border-slate-600 text-white"
-                    placeholder="Brief description of your issue"
+                    placeholder={newTicket.type === 'support' ? 'Brief description of your issue' : 'Feature or improvement request'}
                   />
                 </div>
 
@@ -415,34 +598,48 @@ const Support: React.FC = () => {
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Category
                     </label>
-                    <select
-                      value={newTicket.category}
-                      onChange={(e) => setNewTicket({...newTicket, category: e.target.value})}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
-                    >
-                      <option value="">Select a category</option>
-                      <option value="Technical Support">Technical Support</option>
-                      <option value="Billing">Billing</option>
-                      <option value="Account">Account</option>
-                      <option value="Feature Request">Feature Request</option>
-                      <option value="Bug Report">Bug Report</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <Select value={newTicket.category} onValueChange={(value) => setNewTicket({...newTicket, category: value})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {newTicket.type === 'support' ? (
+                          <>
+                            <SelectItem value="Technical Support">Technical Support</SelectItem>
+                            <SelectItem value="Billing">Billing</SelectItem>
+                            <SelectItem value="Account">Account</SelectItem>
+                            <SelectItem value="Authentication">Authentication</SelectItem>
+                            <SelectItem value="Bug Report">Bug Report</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </>
+                        ) : (
+                          <>
+                            <SelectItem value="UI/UX">UI/UX</SelectItem>
+                            <SelectItem value="Development">Development</SelectItem>
+                            <SelectItem value="Integration">Integration</SelectItem>
+                            <SelectItem value="Performance">Performance</SelectItem>
+                            <SelectItem value="Mobile">Mobile</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Priority
                     </label>
-                    <select
-                      value={newTicket.priority}
-                      onChange={(e) => setNewTicket({...newTicket, priority: e.target.value as TicketData['priority']})}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
+                    <Select value={newTicket.priority} onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setNewTicket({...newTicket, priority: value})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -454,13 +651,15 @@ const Support: React.FC = () => {
                     value={newTicket.description}
                     onChange={(e) => setNewTicket({...newTicket, description: e.target.value})}
                     className="bg-slate-700 border-slate-600 text-white h-32"
-                    placeholder="Please provide detailed information about your issue..."
+                    placeholder={newTicket.type === 'support' ? 
+                      'Please provide detailed information about your issue...' : 
+                      'Describe the feature or improvement you would like to see...'}
                   />
                 </div>
 
                 <Button onClick={createTicket} className="w-full bg-blue-600 hover:bg-blue-700">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Ticket
+                  Create {newTicket.type === 'support' ? 'Support Ticket' : 'Feature Request'}
                 </Button>
               </CardContent>
             </Card>
@@ -468,43 +667,69 @@ const Support: React.FC = () => {
 
           {/* Live Chat Tab */}
           <TabsContent value="chat" className="space-y-6">
-            <Card className="bg-slate-800 border-slate-700 h-96">
+            <Card className="bg-slate-800 border-slate-700 h-[600px]">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white flex items-center">
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  Live Chat Support
-                  <Badge className="ml-auto bg-green-500">Online</Badge>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <div className="flex items-center">
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    Live Chat Support
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-500">
+                      <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></div>
+                      Online
+                    </Badge>
+                    {isAdmin && (
+                      <Badge variant="outline" className="border-purple-400 text-purple-400">
+                        <UserCog className="h-3 w-3 mr-1" />
+                        Admin Mode
+                      </Badge>
+                    )}
+                  </div>
                 </CardTitle>
+                <CardDescription>Chat with our support team in real-time</CardDescription>
               </CardHeader>
               <CardContent className="h-full flex flex-col">
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-2">
+                <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
                   {chatMessages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-xs px-4 py-2 rounded-lg ${
-                          message.sender === 'user'
-                            ? 'bg-blue-600 text-white ml-4'
-                            : 'bg-slate-700 text-slate-100 mr-4'
+                        className={`max-w-md flex items-start gap-3 ${
+                          message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
                         }`}
                       >
-                        <div className="flex items-center space-x-2 mb-1">
-                          {message.sender === 'support' ? (
-                            <Bot className="h-3 w-3" />
-                          ) : (
-                            <User className="h-3 w-3" />
-                          )}
-                          <span className="text-xs opacity-70">
-                            {message.sender === 'support' ? 'Support Agent' : 'You'}
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+                          <AvatarFallback className="bg-slate-600 text-slate-200">
+                            {message.senderName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={`px-4 py-3 rounded-lg ${
+                            message.sender === 'user'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-700 text-slate-100'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium opacity-80">
+                              {message.senderName}
+                            </span>
+                            {message.sender === 'admin' && (
+                              <Badge variant="outline" className="border-green-400 text-green-400 text-xs px-1 py-0">
+                                Admin
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm">{message.text}</p>
+                          <span className="text-xs opacity-60 mt-1 block">
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-sm">{message.text}</p>
-                        <span className="text-xs opacity-50">
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
                       </div>
                     </div>
                   ))}
@@ -512,25 +737,35 @@ const Support: React.FC = () => {
                 </div>
 
                 {/* Chat Input */}
-                <div className="flex space-x-2">
-                  <Input
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                    placeholder="Type your message..."
-                    className="flex-1 bg-slate-700 border-slate-600 text-white"
-                  />
-                  <Button
-                    onClick={sendChatMessage}
-                    size="icon"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                <div className="border-t border-slate-700 pt-4">
+                  <div className="flex space-x-2 items-end">
+                    <Avatar className="w-8 h-8 mb-2">
+                      <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                      <AvatarFallback className="bg-slate-600 text-slate-200">
+                        {currentUser.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <Input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                        placeholder="Type your message..."
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    <Button
+                      onClick={sendChatMessage}
+                      size="icon"
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2 ml-10">
+                    Average response time: 2-3 minutes • {isAdmin ? 'Responding as admin' : 'Connected as user'}
+                  </p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  Average response time: 2-3 minutes
-                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -565,6 +800,20 @@ const Support: React.FC = () => {
                       <p className="text-slate-400">Mon-Fri: 9:00 AM - 6:00 PM EST</p>
                     </div>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <MessageCircle className="h-5 w-5 text-indigo-400" />
+                    <div>
+                      <p className="text-white font-medium">Discord Community</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open('https://discord.gg/codeforge', '_blank')}
+                        className="border-indigo-400 text-indigo-400 hover:bg-indigo-900 mt-1"
+                      >
+                        Join Discord Server
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -575,12 +824,23 @@ const Support: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="space-y-2">
-                    <h4 className="font-medium text-white">Frequently Asked Questions</h4>
+                    <h4 className="font-medium text-white">Support Topics</h4>
                     <ul className="space-y-1 text-sm text-slate-400">
-                      <li>• How to reset my password?</li>
+                      <li>• Account and login issues</li>
                       <li>• Billing and subscription questions</li>
-                      <li>• Course access issues</li>
-                      <li>• Technical requirements</li>
+                      <li>• Course access problems</li>
+                      <li>• Technical troubleshooting</li>
+                      <li>• Platform bugs and errors</li>
+                    </ul>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-white">Feature Requests</h4>
+                    <ul className="space-y-1 text-sm text-slate-400">
+                      <li>• UI/UX improvements</li>
+                      <li>• New course topics</li>
+                      <li>• Mobile app features</li>
+                      <li>• Integration requests</li>
+                      <li>• Performance enhancements</li>
                     </ul>
                   </div>
                   <div className="space-y-2">
